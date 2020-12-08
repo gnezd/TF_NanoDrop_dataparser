@@ -2,12 +2,21 @@
 
 
 
-twbkfile = File.open("./2020_09_28_UV-Vis.twbk", "rb")
+#twbkfile = File.open("./2020_09_28_UV-Vis.twbk", "rb")
+twbkfile = File.open("./2019_11_17_Classic_YCD_drift_noise_estm.twbk", "rb")
 raw = twbkfile.read
 
 puts "Filesize: #{raw.size}"
+=begin
+puts "Occurances of DataCarton"
+puts raw.enum_for(:scan, /(?=DataCarton)/).map {$~.offset(0)[0]}
+=end
 
-puts raw.enum_for(:scan, /(?=DataCarton)/).map {$~.offset(0)[0].to_s(16)}
+puts "Occurances of <XXX>"
+raw.enum_for(:scan, /<\/?[A-Z]{3,10}(\s[^\>]+)?>/).each do |x|
+  pos = $~.offset(0)[0]
+  puts "#{"%08x" % pos}:\t #{$~[0].to_s}"
+end
 
 =begin
 toplevel_parse = raw.split('<PARAMOBJ>')
