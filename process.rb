@@ -5,7 +5,7 @@ require 'csv'
 require './kin_lib.rb'
 
 # Wave length lists
-wv_list = [(240..250), 280, 290, 300, 310]
+wv_list = [(340..390)]
 puts "Input .tsv file name:"
 filename = $stdin.gets.chomp
 raw = File.open(filename, "r").readlines

@@ -24,10 +24,11 @@ end
 
 def parse_twbk(filename)
   begin
-    puts "Opening twbk file: #{filename}.twbk"
-    puts "Outputting at: #{filename}.tsv"
-    fo = File.open("#{filename}.tsv", "w")
-    fin = File.open("#{filename}.twbk", "rb")
+    raise "#{filename} is not a .twbk file" unless filename =~ /(.twbk)$/
+    puts "Opening twbk file: #{filename}"
+    puts "Outputting at: #{filename.split('.twbk')[0]}.tsv"
+    fo = File.open("#{filename.split('.twbk')[0]}.tsv", "w")
+    fin = File.open("#{filename}", "rb")
     raw = fin.read
     acqu_time = Array.new # Spectrum collected at, text
     abs = Array.new
@@ -145,28 +146,41 @@ def parse_twbk(filename)
       end
     }
     puts "Time used for output: #{time_needed_dump}"
-  rescue
-    puts "parsing #{filename} failed"
+  rescue Exception => excep
+    puts "Parsing #{filename} failed: #{excep}"
   end
 end
 
 #---------Begin main
 
-this_s = ENV['_']
-dir = `dirname "#{this_s}"`
+dir = __dir__
 puts "dir = #{dir}"
 # Dir.chdir("/Dropbox/Dropbox/LAb/Scripting field/NanoDrop_dataparse")
 Dir.chdir(dir.chomp)
 puts "Entered #{Dir.pwd}"
-
-if ARGV[0] =~ /(\.twbk)$/ && File.exist?(ARGV[0])
-  filename = ARGV[0].split('.twbk')[0]
-  parse_twbk(filename)
-elsif ARGV[0] == nil
+flist = []
+#if ARGV[0] =~ /(\.twbk)$/ && File.exist?(ARGV[0])
+#  filename = ARGV[0].split('.twbk')[0]
+#  parse_twbk(filename)
+if ARGV[0] == nil
   puts "No command line argument entered."
   flist = `find . -type f -name '*.twbk'`.split("\n")
+elsif ARGV.size == 1
+  flist = Dir.glob ARGV[0]
+  puts flist
+else
+  flist = ARGV
+  puts ARGV
+end
+
+if flist.size > 0
   puts "#{flist.length} file(s) found:"
   puts flist
+  puts "Start parsing"
+  flist.each do |f|
+    parse_twbk(f)
+  end
+=begin
   puts "Parse all these twbk files? (y/n)"
   while input = gets
     if input == "y\n"
@@ -182,6 +196,7 @@ elsif ARGV[0] == nil
       puts "I don't understand. Yes or no? (y/n)"
     end
   end
+=end
 else
-  puts "Didn't find file #{ARGV[0]} as twbk file"
+  puts "No twbk files found for #{ARGV[0]}"
 end
